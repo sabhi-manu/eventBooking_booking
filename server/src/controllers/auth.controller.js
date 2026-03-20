@@ -42,7 +42,7 @@ import jwt from "jsonwebtoken";
 //   }
 // }
 
-export async function registerUser(req, res, next) {
+ async function registerUser(req, res, next) {
   try {
     const { userName, email, password } = req.body;
 
@@ -148,7 +148,7 @@ export async function registerUser(req, res, next) {
 //   }
 // }
 
-export async function loginUser(req, res, next) {
+ async function loginUser(req, res, next) {
   try {
     const { email, password } = req.body;
 
@@ -230,7 +230,11 @@ async function verifyOtp(req, res, next) {
     await client.del(`verifyOtp:${email}`);
     await client.del(`register:${email}`);
 
-    const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET);
+     const token = jwt.sign(
+      { id: user._id, role: user.role },
+      process.env.JWT_SECRET,
+      { expiresIn: "7d" }
+    );
 
     res.cookie("token", token);
 

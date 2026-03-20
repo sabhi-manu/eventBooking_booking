@@ -3,6 +3,7 @@ import cors from "cors";
 
 import UserRoute from "./routes/auth.route.js"
 import EventRoute from "./routes/event.route.js"
+import BookingRoute from "./routes/booking.route.js"
 
 const app = express();
 
@@ -14,7 +15,7 @@ app.use(express.urlencoded())
 // Routes
 app.use("/api/user",UserRoute)
 app.use("/api/event",EventRoute)
-
+app.use("/api/booking",BookingRoute)
 
 
 app.use((err,req,res,next)=>{

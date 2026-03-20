@@ -32,6 +32,7 @@ const eventSchema = new mongoose.Schema(
     },
     image: {
       type: String,
+      default: "",
     },
     ticketPrice: {
       type: Number,
