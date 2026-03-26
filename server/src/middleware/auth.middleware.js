@@ -2,6 +2,7 @@ import jwt from "jsonwebtoken";
 import AppError from "../utils/appError.js";
 
 
+
 export const authmiddleware = (req, res, next) => {
   try {
     const token = req.cookies.token;

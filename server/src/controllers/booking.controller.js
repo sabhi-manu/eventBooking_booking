@@ -1,7 +1,7 @@
-import sendMail from "../config/nodemailer/nodemailer";
-import Booking from "../models/booking.model";
-import Event from "../models/event.model";
-import AppError from "../utils/appError";
+import sendMail from "../config/nodemailer/nodemailer.js";
+import Booking from "../models/booking.model.js";
+import Event from "../models/event.model.js";
+import AppError from "../utils/appError.js";
 
 async function bookEventController(req, res, next) {
   try {
@@ -36,45 +36,11 @@ async function bookEventController(req, res, next) {
   }
 }
 
-// async function confirmBookingController(req,res,next) {
-//     try {
-//         const {id} = req.params  // booking id
-//         const {paymentStatus} = req.body
-//         const booking = await Booking.findById(id).populate("userId").populate("eventId")
-//         if(!booking) throw new AppError(404,"booking not found.")
-//             if(booking.status == "confirmed") throw new AppError(400,"booking already confirmed")
-
-//                 const event = await Event.findById(booking.eventId._id)
-//                 if(event.availableSeat <=0)throw new AppError(400,"No seat are available .")
-//                     booking.status= "confirmed"
-//                if(paymentStatus) {
-//                  booking.paymentStatus = paymentStatus
-//                }
-//                await booking.save()
-//                event.availableSeat -=1
-//                await event.save()
-
-//                await sendMail({
-//                 to : booking.userId.email,
-//                 subject: "Event booking successfully.",
-//                 text :"thank you for booking Event . Enjoy Event."
-//                })
-//                res.status(200).json({
-//                 message:"booking successfully.",
-//                 booking
-//                })
-//     } catch (error) {
-//         console.log("error in confirm booking .")
-//         next(error)
-//     }
-
-// }
 async function confirmBookingController(req, res, next) {
   try {
     const { id } = req.params; // booking id
-    const { paymentStatus } = req.body;
+    const { paymentStatus } = req.body;  // confirmed or cancelled
 
-    // 1. Find booking
     const booking = await Booking.findById(id)
       .populate("userId")
       .populate("eventId");
@@ -87,26 +53,25 @@ async function confirmBookingController(req, res, next) {
       return next(new AppError(400, "Booking already confirmed"));
     }
 
-    // 2. Atomic seat update ( MAIN FIX)
+  
     const updatedEvent = await Event.findOneAndUpdate(
       {
         _id: booking.eventId._id,
-        availableSeat: { $gt: 0 }, // only update if seat available
+        availableSeat: { $gt: 0 }, 
       },
       {
-        $inc: { availableSeat: -1 }, // decrease seat safely
+        $inc: { availableSeat: -1 },
       },
       {
         new: true,
       },
     );
 
-    // If no seat available
+   
     if (!updatedEvent) {
       return next(new AppError(400, "No seats available"));
     }
 
-    // 3. Update booking
     booking.status = "confirmed";
 
     if (paymentStatus) {
@@ -115,7 +80,7 @@ async function confirmBookingController(req, res, next) {
 
     await booking.save();
 
-    // 4. Send email
+
     await sendMail({
       to: booking.userId.email,
       subject: "Event Booking Confirmed",

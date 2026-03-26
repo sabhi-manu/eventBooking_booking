@@ -5,46 +5,10 @@ import AppError from "../utils/appError.js";
 import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
 
-// async function registerUser(req, res, next) {
-//   try {
-//     const { userName, email, password } = req.body;
-//     if (!userName || !email || !password)
-//       throw new AppError(400, "all details are required");
-//     const isUser = await User.findOne({ $or: [{ email }, { userName }] });
-//     if (isUser) throw new AppError(400, "user already exist.");
-//     const hashPassword = await bcrypt.hash(password, 10);
-//     const user = await User.create({
-//       userName,
-//       email,
-//       password: hashPassword,
-//     });
-//     if (!user) throw new AppError(400, " register user unsuccessful.");
-//     let otp = Math.floor(100000 + Math.random() * 900000).toString();
-
-//     await client.set(`verifyOtp:${user.email}`, otp, "EX", 300);
-
-//     await sendMail({
-//       to: user.email,
-//       subject: "verify otp",
-//         text: `Your OTP is ${otp}`,
-//     });
-//     const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET);
-//     res.cookie("token", token);
-//     console.log("final response ==>", user, token);
-//     res.status(201).json({
-//       success: true,
-//       message: "email send to  register successfully.",
-//       user,
-//       token,
-//     });
-//   } catch (error) {
-//     console.log("error register controller ==>", error.message);
-//   }
-// }
 
  async function registerUser(req, res, next) {
   try {
-    const { userName, email, password } = req.body;
+    const { userName, email, password ,role} = req.body;
 
     if (!userName || !email || !password) {
       return next(new AppError(400, "All fields required"));
@@ -55,18 +19,18 @@ import jwt from "jsonwebtoken";
       return next(new AppError(400, "User already exists"));
     }
 
-    // Generate OTP
+   
     const otp = Math.floor(100000 + Math.random() * 900000).toString();
 
-    // Store user temp data in Redis
+    
     await client.set(
       `register:${email}`,
-      JSON.stringify({ userName, email, password }),
+      JSON.stringify({ userName, email, password ,role}),
       "EX",
       300
     );
 
-    await client.set(`otp:${email}`, otp, "EX", 300);
+    await client.set(`verifyOtp:${email}`, otp, "EX", 300);
 
     await sendMail({
       to: email,
@@ -80,73 +44,10 @@ import jwt from "jsonwebtoken";
     });
 
   } catch (error) {
-    next(error);
+    next(error); 
   }
 }
 
-// async function loginUser(req, res, next) {
-//   try {
-//     const { email, userName, password } = req.body;
-//     if (!userName || !email || !password) throw new AppError(400, "all details required");
-//     const user = await User.findOne({
-//       email,
-//     });
-//     if (!user) throw new AppError(404, "user not found");
-//     const isPassword = await bcrypt.compare(password, user.password);
-  
-//     if (!isPassword) {
-//       return next(new AppError(401, "Invalid credentials"));
-//     }
-//     const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET);
-//     res.cookie("token", token);
-//     res.status(200).json({
-//       success: true,
-//       message: "user login successfully.",
-//       user,
-//       token,
-//     });
-//   } catch (error) {
-//     console.log("error in login controller.");
-//     next(error);
-//   }
-// }
-
-// async function verifyOtp(req, res, next) {
-//   try {
-//     let { otp, email } = req.body;
-
-//         if (!email || !otp) {
-//       return next(new AppError(400, "Email and OTP required"));
-//     }
-
-//       const storedOtp = await client.get(`verifyOtp:${email}`);
-
-//     if (!storedOtp) {
-//       return next(new AppError(400, "OTP expired"));
-//     }
-
-//     if (storedOtp !== otp) {
-//       return next(new AppError(400, "Invalid OTP"));
-//     }
-
-//     const user = await User.findOneAndUpdate(
-//       { email },
-//       {
-//         isVerified: true,
-//       },
-//          { new: true }
-//     );
-//       await client.del(`verifyOtp:${email}`);
-//     res.status(200).json({
-//       success: true,
-//       message: "Email verified successfully",
-//       user,
-//     });
-//   } catch (error) {
-//     console.log("error in verifyotp", error.message);
-//     next(error);
-//   }
-// }
 
  async function loginUser(req, res, next) {
   try {
@@ -215,7 +116,7 @@ async function verifyOtp(req, res, next) {
       return next(new AppError(400, "Registration expired"));
     }
 
-    const { userName, password } = JSON.parse(userData);
+    const { userName, password ,role } = JSON.parse(userData);
 
     const hashPassword = await bcrypt.hash(password, 10);
 
@@ -224,6 +125,7 @@ async function verifyOtp(req, res, next) {
       email,
       password: hashPassword,
       isVerified: true,
+      role
     });
 
     // Clean Redis
