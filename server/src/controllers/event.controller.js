@@ -2,7 +2,7 @@ import Event from "../models/event.model.js";
 import AppError from "../utils/appError.js";
 import uploadToCloudinary from "../utils/cloudinary.js";
 
-export async function createEvent(req, res) {
+export async function createEvent(req, res,next) {
   try {
     const {
       title,
@@ -26,12 +26,13 @@ export async function createEvent(req, res) {
       throw new AppError(400, "All fields required");
 
     let uploadedImageUrl = "";
-
+// console.log(title,description,date,location,category,totalSeat,availableSeat,ticketPrice)
     const imageFile = req.file;
-
+   console.log("image file ==>",imageFile)
     if (imageFile) {
       uploadedImageUrl = await uploadToCloudinary(imageFile.path);
     }
+    console.log("uploaded image url ==>",uploadedImageUrl)
     const event = new Event({
       title,
       description,
@@ -45,11 +46,11 @@ export async function createEvent(req, res) {
       createdBy: req.user.id,
     });
     await event.save();
-
+console.log("event created ==>", event) 
     res.status(201).json({
       success: true,
       message: "Event created successfully",
-      event,
+      // event,
     });
   } catch (error) {
     console.log("error in create event controller", error.message);
@@ -165,7 +166,7 @@ export async function updateEventImage(req, res, next) {
       return next(new AppError(400, "Image file required"));
     }
 
-    const newImageUrl = await uploadToCloudinary(req.file.buffer);
+    const newImageUrl = await uploadToCloudinary(req.file.path);
 
     event.image = newImageUrl;
 

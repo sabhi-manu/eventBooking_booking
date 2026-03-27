@@ -12,6 +12,6 @@ route.get("/",authmiddleware, getEvents )
 route.get("/:id", authmiddleware, getEventById )
 route.patch("/:id",authmiddleware, authrole("admin"), updateEventDetails )
 route.delete("/:id",authmiddleware, authrole("admin"), deleteEvent )
-route.put("/image/:id",authmiddleware,authrole("admin"),upload.single("image"),updateEventImage)
+route.patch("/image/:id",authmiddleware,authrole("admin"),upload.single("image"),updateEventImage)
 
 export default route; 

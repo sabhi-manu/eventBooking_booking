@@ -36,6 +36,8 @@ async function bookEventController(req, res, next) {
   }
 }
 
+
+// admin can confrim or cancel the booking.
 async function confirmBookingController(req, res, next) {
   try {
     const { id } = req.params; // booking id
@@ -72,24 +74,42 @@ async function confirmBookingController(req, res, next) {
       return next(new AppError(400, "No seats available"));
     }
 
-    booking.status = "confirmed";
+  
 
     if (paymentStatus) {
       booking.paymentStatus = paymentStatus;
+      if(paymentStatus === "paid"){
+        booking.status = "confirmed";
+      } else {
+        booking.status = "cancelled";
+        await Event.findByIdAndUpdate(booking.eventId._id, {
+          $inc: { availableSeat: 1 },
+        });
+      }
     }
 
     await booking.save();
 
 
-    await sendMail({
-      to: booking.userId.email,
-      subject: "Event Booking Confirmed",
-      text: "Your booking is confirmed. Enjoy the event 🎉",
-    });
+    if (booking.status === "confirmed") {
+      await sendMail({
+        to: booking.userId.email,
+        subject: "Event Booking Confirmed",
+        text: `Your booking for the event "${booking.eventId.title}" is confirmed. Enjoy the event!`,
+      });
+    } else if (booking.status === "cancelled") {
+      await sendMail({
+        to: booking.userId.email,
+        subject: "Event Booking Cancelled",
+        text: `Your booking for the event "${booking.eventId.title}" has been cancelled.`,
+      });
+    }
+
+
 
     res.status(200).json({
       success: true,
-      message: "Booking confirmed successfully",
+      message: `your booking ${booking.status} successfully.`,
       booking,
     });
   } catch (error) {
@@ -120,7 +140,7 @@ async function getBookingController(req, res, next) {
 async function cancelBooking(req, res, next) {
   try {
     const { id } = req.params; // booking id
-    const booking = await Booking.findById(id);
+    const booking = await Booking.findById(id).populate("eventId");
     if (!booking) throw new AppError(404, "booking not found.");
 
     if (
@@ -133,18 +153,14 @@ async function cancelBooking(req, res, next) {
     if (booking.status == "cancelled")
       throw new AppError(400, "already canclled");
 
-    const isBookingConfirmed = booking.status === "confirmed";
 
     booking.status = "cancelled";
     await booking.save();
-    if (isBookingConfirmed) {
-      if (
-        booking.userId.toString() !== req.user.id &&
-        req.user.role !== "admin"
-      ) {
-        throw new AppError(403, "Not authorized");
-      }
-    }
+    await Event.findOneAndUpdate(
+      { _id: booking.eventId._id },
+      { $inc: { availableSeat: 1 } },
+      { new: true },
+    );
     res.status(200).json({
       message: "booking cancelled successfully.",
     });
