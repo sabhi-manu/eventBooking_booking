@@ -8,7 +8,7 @@ import { authmiddleware } from "../middleware/auth.middleware.js";
 const route = express.Router();
 
 route.post("/", authmiddleware, authrole("admin"), upload.single("image") , createEvent )
-route.get("/",authmiddleware, getEvents )
+route.get("/", getEvents )
 route.get("/:id", authmiddleware, getEventById )
 route.patch("/:id",authmiddleware, authrole("admin"), updateEventDetails )
 route.delete("/:id",authmiddleware, authrole("admin"), deleteEvent )
