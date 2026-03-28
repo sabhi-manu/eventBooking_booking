@@ -40,10 +40,10 @@ const Home = () => {
   return (
     <div className="bg-gray-100 min-h-screen">
 
-      {/* 🔥 HERO */}
+   
       <div className="bg-linear-to-r from-black to-gray-800 text-white py-20 text-center px-4">
         <h1 className="text-5xl font-bold mb-4">
-          Discover & Book Amazing Events 🎉
+          Discover & Book Amazing Events 
         </h1>
         <p className="text-gray-300 mb-6">
           Find concerts, workshops, meetups and more
@@ -75,7 +75,7 @@ const Home = () => {
         ))}
       </div>
 
-      {/* ⭐ FEATURED EVENTS */}
+     
       <div className="px-6 mt-8 max-w-7xl mx-auto">
         <h2 className="text-2xl font-semibold mb-4">⭐ Featured Events</h2>
 
