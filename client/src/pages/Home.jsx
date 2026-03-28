@@ -1,10 +1,13 @@
-import React, { useEffect, useState } from "react";
+import React, { useContext, useEffect, useState } from "react";
 import axiosInstanc from "../utils/axios";
 import { Link } from "react-router-dom";
+import { AuthContext } from "../contexts/AuthContext";
 
 const categories = ["All", "Music", "Tech", "Sports", "Business"];
 
 const Home = () => {
+  const {user} = useContext(AuthContext)
+  console.log("user in home ++>",user)
   const [events, setEvents] = useState([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");

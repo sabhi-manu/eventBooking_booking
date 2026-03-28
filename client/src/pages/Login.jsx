@@ -1,7 +1,11 @@
-import React, { useState } from "react";
-import { Link } from "react-router-dom";
+import React, { useContext, useState } from "react";
+import { Link, useNavigate } from "react-router-dom";
+import axiosInstanc from "../utils/axios";
+import { AuthContext } from "../contexts/AuthContext";
 
 export default function Login() {
+  const {login } = useContext(AuthContext)
+  const navigate = useNavigate()
   const [data, setData] = useState({ email: "", password: "" });
   const [loading, setLoading] = useState(false);
 
@@ -10,15 +14,21 @@ export default function Login() {
     setData((prev) => ({ ...prev, [name]: value }));
   };
 
-  const submitHandler = (e) => {
+  const submitHandler = async(e) => {
     e.preventDefault();
     setLoading(true);
 
-    // Simulate API call
-    setTimeout(() => {
-      console.log("Login Data:", data);
-      setLoading(false);
-    }, 1500);
+   try {
+   let resp =  await login(data)
+   console.log("response in login file ==>",resp)
+    if(resp?.data?.success){
+      navigate("/")
+    }
+   } catch (error) {
+    console.log("error in login user.",error)
+   }finally{
+    setLoading(false)
+   }
   };
 
   return (

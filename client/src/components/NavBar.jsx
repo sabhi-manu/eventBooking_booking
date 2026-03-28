@@ -24,12 +24,12 @@ const NavBar = () => {
       {/* Links */}
       <div className="flex items-center gap-6 text-sm md:text-base">
         
-        <Link
+        {/* <Link
           to="/events"
           className="hover:text-yellow-400 transition"
         >
           Events
-        </Link>
+        </Link> */}
 
         {user ? (
           <>

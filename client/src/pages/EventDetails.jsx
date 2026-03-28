@@ -5,6 +5,7 @@ import axiosInstanc from "../utils/axios";
 const EventDetails = () => {
   const [event, setEvent] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [bookStatus,setBookStatus] = useState(false)
   const { id } = useParams();
 console.log("id for event ==>",id)
   useEffect(() => {
@@ -21,6 +22,18 @@ console.log("id for event ==>",id)
 
     fetchEvent();
   }, [id]);
+
+  const bookingHandler = async ()=>{
+    setBookStatus(true)
+     try {
+      const {data} = await axiosInstanc.post(`/event/${id}/confirm`)
+      console.log("booking status==>",data)
+     } catch (error) {
+      console.log("error in booking event ==>",error)
+     }finally{
+      setBookStatus(false)
+     }
+  }
 
   if (loading) {
     return (
@@ -78,7 +91,7 @@ console.log("id for event ==>",id)
             </div>
 
            
-            <button className="bg-blue-600 text-white px-6 py-2 rounded-lg hover:bg-blue-700 transition">
+            <button className="bg-blue-600 text-white px-6 py-2 rounded-lg hover:bg-blue-700 transition" onClick={bookingHandler}>
               Book Now
             </button>
           </div>

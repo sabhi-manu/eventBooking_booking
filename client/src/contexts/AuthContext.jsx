@@ -26,11 +26,13 @@ export const AuthProvider = ({ children }) => {
   };
 
   const login = async (data) => {
+    console.log("user login data in auth context ==>",data)
     try {
-      let { data } = await axiosInstanc.post("/user/login", data);
-      setUser(data);
-      localStorage.setItem("userInfo", JSON.stringify(data));
-      return data;
+      let response= await axiosInstanc.post("/user/login", data);
+      setUser(response.data.user);
+      localStorage.setItem("userInfo", JSON.stringify(response.data.user));
+      console.log("respnse of login user ==>",response)
+      return response;
     } catch (error) {
       console.log("error during login:==>", error);
       throw error.response?.data?.message || "Login failed";
