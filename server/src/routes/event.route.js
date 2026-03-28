@@ -9,7 +9,7 @@ const route = express.Router();
 
 route.post("/", authmiddleware, authrole("admin"), upload.single("image") , createEvent )
 route.get("/", getEvents )
-route.get("/:id", authmiddleware, getEventById )
+route.get("/:id", getEventById )
 route.patch("/:id",authmiddleware, authrole("admin"), updateEventDetails )
 route.delete("/:id",authmiddleware, authrole("admin"), deleteEvent )
 route.patch("/image/:id",authmiddleware,authrole("admin"),upload.single("image"),updateEventImage)

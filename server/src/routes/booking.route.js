@@ -5,9 +5,9 @@ import { bookEventController, cancelBooking, confirmBookingController, getBookin
 
 const route = express.Router()
 
-route.post("/:id",authmiddleware,bookEventController)
-route.patch("/:id/confirm",authmiddleware,authrole("admin"),confirmBookingController)
+route.post("/:id",authmiddleware , authrole("admin"),bookEventController)
+route.patch("/:id/confirm",authmiddleware,authrole("admin"),confirmBookingController) 
 route.get("/",authmiddleware,getBookingController)
-route.patch("/:id",authmiddleware,cancelBooking)
+route.patch("/:id",authmiddleware ,authrole("admin"),cancelBooking)
 
 export default route
